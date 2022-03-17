@@ -51,17 +51,16 @@
 ;;; facilities. Annotations follow Aural CSS as implemented in
 ;;; Emacspeak, This allows us to map these expressions to aural
 ;;; properties supported by specific TTS engines. 
-;;; @subsection Basic Usage: 
 ;;;
 ;;; Start  the server/client: M-x emacspeak-maths-start. Once the server
 ;;; and client are started, you can browse any number of math
-;;; expressions using the emacspeak-maths-navigator described below.
-;;; Load module @xref{emacspeak-muggles}  for the maths-navigator
-;;; described below.
+;;; expressions using the emacspeak-maths-navigator defined in module
+;;; @xref{emacspeak-maths} as described below.
+;;;
 ;;; Note: In general, once everything is configured correctly, using
 ;;; the maths navigator automatically starts the server and
-;;; client. Invoke the Navigator using s-spc --- this is the <windows>
-;;; key on
+;;; client. Invoke the Navigator using @kbd{s-spc} --- this is the <windows>
+;;; key on Linux laptops.
 ;;; Linux. Now you can use these keys:
 ;;; @itemize
 ;;; @item  Show Output <o> Switch to output buffer and quit Maths Navigator

@@ -53,8 +53,8 @@
 
 (when (file-exists-p tvr-site-lib)
   (push tvr-site-lib load-path)
-  (push (expand-file-name "vm/lisp/" tvr-site-lib) load-path))
-(push (expand-file-name "eaf/" tvr-site-lib) load-path)
+  (push (expand-file-name "vm/lisp/" tvr-site-lib) load-path)
+  (push (expand-file-name "eaf/" tvr-site-lib) load-path))
 
 (defvar tvr-libs
   "all-prepare"
@@ -141,7 +141,12 @@ startup sound."
   "Customize my emacs.
 Use Custom to customize where possible. "
   (cl-declare (special custom-file
-                       outline-mode-prefix-map outline-minor-mode-prefix))
+                       python-mode-hook outline-mode-prefix-map
+                       outline-minor-mode-prefix))
+  (add-hook 'python-mode-hook
+            #'(lambda nil
+                (elpy-enable)
+                (define-key elpy-mode-map (ems-kbd "C-c C-a") 'elpy-format-code)))
   (setq outline-minor-mode-prefix "\C-co")
 ;;; basic look and feel
   (setq frame-title-format '(multiple-frames "%b" ("Emacs")))
@@ -174,14 +179,10 @@ Use Custom to customize where possible. "
    (global-set-key (ems-kbd (format "C-c %s" i)) 'emacspeak-wizards-shell-by-key))
 ;;; Smarten up ctl-x-map
   (define-key ctl-x-map "c" 'compile)
-  (define-key ctl-x-map "g" 'magit-status)
-  (define-key ctl-x-map "\M-g" 'magit-dispatch)
   (define-key ctl-x-map "j" 'pop-global-mark)
   (define-key ctl-x-map "u"  'undo-only)
   (define-key ctl-x-map (ems-kbd "C-u") 'undo-redo)
   (define-key ctl-x-map (ems-kbd "C-d") 'dired-jump)
-  (define-key ctl-x-map (ems-kbd "C-n") 'forward-page)
-  (define-key ctl-x-map (ems-kbd "C-p") 'backward-page)
 ;;; Shell mode bindings:
   (with-eval-after-load 'shell  (tvr-shell-bind-keys))
 ;;; Outline Setup:
@@ -195,19 +196,16 @@ Use Custom to customize where possible. "
   (setq custom-file (expand-file-name "~/.customize-emacs"))
   (load-theme 'modus-vivendi t)
   (tvr-time-load (when (file-exists-p custom-file)  (load custom-file))))
-(defvar tvr-yas-loaded nil)
 
 (defun tvr-after-init ()
   "Actions to take after Emacs is up and ready."
 ;;; load  library-specific settings, customize, then start things.
-  (cl-declare (special  tvr-libs tvr-yas-loaded))
+  (cl-declare (special  tvr-libs))
   (tvr-time-load (load tvr-libs)) ;;; load  settings   not  customizable via custom.
   (tvr-customize)      ;;; customizations
   (with-eval-after-load
       'yasnippet
-    (unless tvr-yas-loaded
-      (yas-reload-all)
-      (setq tvr-yas-loaded t)))
+      (yas-reload-all))
   (tvr-time-load (load "emacspeak-muggles"))
   (soundscape-toggle)
   (emacspeak-wizards-project-shells-initialize))
@@ -233,8 +231,7 @@ Use Custom to customize where possible. "
   (cond
    ((memq major-mode '(emacs-lisp-mode lisp-mode lisp-interaction-mode))
     (when dtk-caps
-      (setq dtk-caps nil)
-      (setq-default dtk-caps nil))
+      (setq dtk-caps nil))
     (lispy-mode ))
    (t (smartparens-mode)))
   (yas-minor-mode)
@@ -248,9 +245,8 @@ Use Custom to customize where possible. "
 This function loads Emacspeak.
 Emacs customization and library configuration happens via the after-init-hook. "
   (cl-declare (special emacspeak-directory))
-  (unless (featurep 'emacspeak)
-    (tvr-time-load ;;; load emacspeak:
-        (load (expand-file-name "~/emacs/lisp/emacspeak/lisp/emacspeak-setup"))))
+  (tvr-time-load ;;; load emacspeak:
+      (load (expand-file-name "~/emacs/lisp/emacspeak/lisp/emacspeak-setup")))
   (cl-pushnew (expand-file-name "tvr/" emacspeak-directory) load-path
               :test #'string-equal)
   (add-hook 'after-init-hook #'tvr-after-init)

@@ -1145,7 +1145,25 @@ Note that the Web browser should reset this hook after using it.")
     (shr-generic dom)
     (put-text-property start (point) 'article 'eww-tag)))
 
-(defvar emacspeak-eww-shr-render-functions
+
+(defun emacspeak-eww-em-with-newline  (dom)
+  "render EM node but with newline after."
+  (shr-tag-em dom)
+  (insert "  \n"))
+
+
+(defun emacspeak-eww-span-with-newline  (dom)
+  "render span  node but with newline after."
+  (shr-tag-span dom)
+  (insert "  \n"))
+
+(defun emacspeak-eww-strong-with-newline  (dom)
+  "render STRONG node but with newline after."
+  (shr-tag-strong dom)
+  (insert "\n"))
+
+
+(defvar emacspeak-eww-shr-renderers
   '((article . emacspeak-eww-tag-article)
     (title . eww-tag-title)
     (form . eww-tag-form)
@@ -1158,6 +1176,15 @@ Note that the Web browser should reset this hook after using it.")
     (link . eww-tag-link)
     (a . eww-tag-a))
   "Customize shr rendering for EWW.")
+;;; Create a special list of renderers to use when filtering 
+(defvar emacspeak-eww-filter-renderers
+  (let ((copy (copy-sequence emacspeak-eww-shr-renderers)))
+    (cl-pushnew (cons 'em 'emacspeak-eww-em-with-newline) copy)
+    (cl-pushnew (cons 'strong 'emacspeak-eww-strong-with-newline)
+                copy)
+    (cl-pushnew (cons 'span 'emacspeak-eww-span-with-newline) copy)
+    copy)
+  "Renderers used when filtering.")
 
 (defun eww-dom-keep-if (dom predicate)
   "Return filtered DOM  keeping nodes that match  predicate.
@@ -1223,16 +1250,15 @@ for use as a DOM filter."
 (defun emacspeak-eww-view-helper  (filtered-dom)
   "View helper called by various filtering viewers."
   (cl-declare (special emacspeak-eww-rename-result-buffer
-                       emacspeak-eww-shr-render-functions))
+                       emacspeak-eww-filter-renderers))
   (let ((emacspeak-eww-rename-result-buffer nil)
         (url (eww-current-url))
         (title  (format "%s: Filtered" (emacspeak-eww-current-title)))
         (inhibit-read-only t)
-        (shr-external-rendering-functions emacspeak-eww-shr-render-functions))
+        (shr-external-rendering-functions emacspeak-eww-filter-renderers))
     (eww-save-history)
     (erase-buffer)
     (goto-char (point-min))
-;;;(setq shr-base (shr-parse-base url))
     (shr-insert-document filtered-dom)
     (emacspeak-eww-set-dom filtered-dom)
     (emacspeak-eww-set-url url)
@@ -1438,7 +1464,7 @@ Optional interactive arg `multi' prompts for multiple classes."
   "Display DOM filtered by specified  nodes not passing   role=value test.
 Optional interactive arg `multi' prompts for multiple classes."
   (interactive "P")
-  (cl-declare (special  emacspeak-eww-shr-render-functions))
+  (cl-declare (special  emacspeak-eww-shr-renderers))
   (emacspeak-eww-prepare-eww)
   (let ((dom
          (eww-dom-remove-if
@@ -1474,7 +1500,7 @@ Optional interactive arg `multi' prompts for multiple classes."
   "Display DOM filtered by specified  nodes not passing   property=value test.
 Optional interactive arg `multi' prompts for multiple classes."
   (interactive "P")
-  (cl-declare (special  emacspeak-eww-shr-render-functions))
+  (cl-declare (special  emacspeak-eww-shr-renderers))
   (emacspeak-eww-prepare-eww)
   (let ((dom
          (eww-dom-remove-if
@@ -1510,7 +1536,7 @@ Optional interactive arg `multi' prompts for multiple classes."
   "Display DOM filtered by specified  nodes not passing   itemprop=value test.
 Optional interactive arg `multi' prompts for multiple classes."
   (interactive "P")
-  (cl-declare (special  emacspeak-eww-shr-render-functions))
+  (cl-declare (special  emacspeak-eww-shr-renderers))
   (emacspeak-eww-prepare-eww)
   (let ((dom
          (eww-dom-remove-if
@@ -2424,14 +2450,14 @@ With interactive prefix arg, move to the start of the table."
 ;;{{{Open With External Browser: EAF, Chrome
 
 (declare-function eaf-open-browser "eaf-browser" (url &optional args))
-
+;;;###autoload
 (defun emacspeak-eww-browse-eaf  (url)
   "Launch async EAF browser."
   (interactive (list (emacspeak-eww-read-url)))
   (unless(require 'eaf)
     (error "Install Emacs Application Framework"))
   (require 'eaf-browser)
-  (make-thread #'(lambda ()(eaf-open-browser url))))
+  (eaf-open-browser url))
 
 (defun emacspeak-eww-browse-chrome (url)
   "Open with Chrome."

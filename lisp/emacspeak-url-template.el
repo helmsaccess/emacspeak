@@ -559,7 +559,7 @@ name of the list.")
 
 (emacspeak-url-template-define
  "CNN Market Data "
- "http://money.cnn.com/markets/data/"
+ "https://money.cnn.com/data/markets/"
  nil
  #'(lambda nil
      (cl-declare (special emacspeak-we-url-executor))
@@ -1150,7 +1150,7 @@ Each URL template carries out the following steps:
     (unless book (error "No Book URL specified"))
     (setq add
           (replace-regexp-in-string "download/detail" "wishlist/add" book))
-    (message "Adding book to wishlist.")
+    (message "Updating  book in  wishlist.")
     (emacspeak-auditory-icon 'progress)
     (eww add)))
 

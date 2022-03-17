@@ -85,7 +85,8 @@ T               emacspeak-table-goto-top
 
 The next two commands let you search the table.
 The commands ask you if you want to search rows or columns.
-When searching headers remember that row 0 is the column header, and that column 0 is the row header.
+When searching headers remember that row 0 is the column header,
+and that column 0 is the row header.
 
 h               emacspeak-table-search-headers
 s               emacspeak-table-search
@@ -973,7 +974,7 @@ match, makes the matching row or column current."
   (cl-assert  (boundp 'emacspeak-table) nil "No table here")
   (kill-new  (emacspeak-table-current-element emacspeak-table))
   (when (called-interactively-p 'interactive) 
-    (emacspeak-auditory-icon 'delete-object)
+    (emacspeak-auditory-icon 'yank-object)
     (message "Copied element to kill ring")))
 (defun emacspeak-table-copy-current-element-to-register (register)
   "Copy current table element to specified register."
@@ -1043,17 +1044,6 @@ table markup.")
                                    :col-start ""
                                    :col-end ""
                                    :col-separator " & "))
-
-(emacspeak-table-markup-set-table
- 'org-mode
- (emacspeak-table-make-markup
-  :table-start "|-|\n"
-  :table-end "|-|\n"
-  :row-start "|"
-  :row-end "|\n"
-  :col-start ""
-  :col-end ""
-  :col-separator " | "))
 (emacspeak-table-markup-set-table 'latex-mode
                                   (emacspeak-table-markup-get-table
                                    'latex2e-mode))
@@ -1083,8 +1073,8 @@ table markup.")
                                    :table-end ""
                                    :row-start ""
                                    :row-end "\n"
-                                   :col-start ""
-                                   :col-end ""
+                                   :col-start "\""
+                                   :col-end "\""
                                    :col-separator ", "))
 
 (emacspeak-table-markup-set-table 'text-mode
